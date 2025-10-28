@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Search Course to Delete</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="course_id" class="form-label">Course ID</label>
+            <input type="text" class="form-control" id="course_id" name="course_id" required>
+        </div>
+        <button type="submit" class="btn btn-danger">Search for Delete</button>
+        <a href="{{ url_for('manage_courses') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

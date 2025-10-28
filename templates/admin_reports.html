@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Report Generation</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-dark">Generate Report</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="report_type" class="form-label text-dark">Report Type</label>
+                            <select class="form-select" id="report_type" name="report_type" required onchange="toggleFields()">
+                                <option value="">Select Report Type</option>
+                                <option value="semester">Semester Report</option>
+                                <option value="attendance">Attendance Report</option>
+                                <option value="marks">Marks Report</option>
+                                <option value="sgpa">SGPA Report</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Semester Report Fields -->
+                        <div id="semester-fields" class="report-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="year-sem" class="form-label text-dark">Year (e.g., 2020)</label>
+                                    <input type="number" class="form-control" id="year-sem" name="year-sem" min="2000" max="2030" placeholder="2020">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="semester-sem" class="form-label text-dark">Semester (Even/Odd)</label>
+                                    <select class="form-select" id="semester-sem" name="semester-sem">
+                                        <option value="">Select</option>
+                                        <option value="Even">Even</option>
+                                        <option value="Odd">Odd</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Attendance Report Fields -->
+                        <div id="attendance-fields" class="report-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="course_id-att" class="form-label text-dark">Course ID</label>
+                                    <input type="text" class="form-control" id="course_id-att" name="course_id-att">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="year-att" class="form-label text-dark">Year (e.g., 2020)</label>
+                                    <input type="number" class="form-control" id="year-att" name="year-att" min="2000" max="2030" placeholder="2020">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Marks Report Fields -->
+                        <div id="marks-fields" class="report-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="course_id-marks" class="form-label text-dark">Course ID</label>
+                                    <input type="text" class="form-control" id="course_id-marks" name="course_id-marks">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="year-marks" class="form-label text-dark">Year (e.g., 2020)</label>
+                                    <input type="number" class="form-control" id="year-marks" name="year-marks" min="2000" max="2030" placeholder="2020">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="semester-marks" class="form-label text-dark">Semester (Even/Odd)</label>
+                                    <select class="form-select" id="semester-marks" name="semester-marks">
+                                        <option value="">Select</option>
+                                        <option value="Even">Even</option>
+                                        <option value="Odd">Odd</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SGPA Report (no params) -->
+                        <div id="sgpa-fields" class="report-fields" style="display: none;">
+                            <p class="text-muted">No parameters required. Generates full SGPA report.</p>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Generate and Download Report</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFields() {
+    const type = document.getElementById('report_type').value;
+    document.querySelectorAll('.report-fields').forEach(field => field.style.display = 'none');
+    if (type === 'semester') {
+        document.getElementById('semester-fields').style.display = 'block';
+    } else if (type === 'attendance') {
+        document.getElementById('attendance-fields').style.display = 'block';
+    } else if (type === 'marks') {
+        document.getElementById('marks-fields').style.display = 'block';
+    } else if (type === 'sgpa') {
+        document.getElementById('sgpa-fields').style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Search Faculty to Update</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="institute_id" class="form-label">Institute ID</label>
+            <input type="text" class="form-control" id="institute_id" name="institute_id" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

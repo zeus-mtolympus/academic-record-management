@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Confirm Delete Course</h1>
+    <div class="alert alert-danger">
+        <h4>Are you sure?</h4>
+        <p>This will permanently delete the course: <strong>{{ course.name }}</strong> (ID: {{ course.course_id }})</p>
+        <p>This action cannot be undone. Any related enrollments may be affected.</p>
+    </div>
+    <form method="POST" action="{{ url_for('delete_course') }}">
+        <input type="hidden" name="course_id" value="{{ course.course_id }}">
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{{ url_for('manage_courses') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

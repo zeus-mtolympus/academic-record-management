@@ -1,0 +1,175 @@
+<!-- Updated admin_users.html - replace existing -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>User Management</h1>
+    
+    <!-- Add User Section (unchanged) -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Add New User</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">User Type</label>
+                        <select class="form-select" name="user_type" required>
+                            <option value="">Select Type</option>
+                            <option value="admin">Admin</option>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success">Proceed to Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Update User Section (unchanged) -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Update User</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="update">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">User Type</label>
+                        <select class="form-select" name="user_type" required>
+                            <option value="">Select Type</option>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-warning">Proceed to Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toggle Buttons for Tables -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#adminsTable" aria-expanded="false" aria-controls="adminsTable">
+                Show Admins
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#studentsTable" aria-expanded="false" aria-controls="studentsTable">
+                Show Students
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#facultyTable" aria-expanded="false" aria-controls="facultyTable">
+                Show Faculty
+            </button>
+        </div>
+    </div>
+    
+    <!-- Admins Table (collapsible) -->
+    <div class="collapse" id="adminsTable">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Admins</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admin in admins %}
+                            <tr>
+                                <td>{{ admin.username }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Students Table (collapsible) -->
+    <div class="collapse" id="studentsTable">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Students</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Institute ID</th>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Batch</th>
+                                <th>CGPA</th>
+                                <th>Status</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.institute_id }}</td>
+                                <td>{{ student.roll_no }}</td>
+                                <td>{{ student.name }}</td>
+                                <td>{{ student.batch }}</td>
+                                <td>{{ student.cgpa }}</td>
+                                <td>{{ student.status }}</td>
+                                <td>{{ student.email }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Faculty Table (collapsible) -->
+    <div class="collapse" id="facultyTable">
+        <div class="card">
+            <div class="card-header">
+                <h3>Faculty</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Institute ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fac in faculty %}
+                            <tr>
+                                <td>{{ fac.institute_id }}</td>
+                                <td>{{ fac.name }}</td>
+                                <td>{{ fac.status }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

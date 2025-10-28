@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Add Enrollments</h1>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="institute_ids" class="form-label text-dark">Institute IDs (comma-separated for multiple)</label>
+                    <textarea class="form-control" id="institute_ids" name="institute_ids" rows="3" placeholder="e.g., INST001, INST002, INST003" required></textarea>
+                    <div class="form-text">Enter one or more institute IDs separated by commas. Invalid IDs will be skipped with errors shown.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="semester" class="form-label text-dark">Semester</label>
+                    <select class="form-select" id="semester" name="semester" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">Odd</option>
+                        <option value="2">Even</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="year" class="form-label text-dark">Year</label>
+                    <input type="number" class="form-control" id="year" name="year" min="1" max="4" value="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label text-dark">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Completed">Completed</option>
+                        <option value="Backlog">Backlog</option>
+                        <option value="Enrolled">Enrolled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="course_ids" class="form-label text-dark">Courses (select multiple)</label>
+                    <select class="form-select" id="course_ids" name="course_ids" multiple size="10" required style="height: 250px;">
+                        {% for course in courses %}
+                        <option value="{{ course.course_id }}">{{ course.name }} ({{ course.course_id }})</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Hold Ctrl/Cmd to select multiple courses.</div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Add Enrollments</button>
+        <a href="{{ url_for('manage_enrollments') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

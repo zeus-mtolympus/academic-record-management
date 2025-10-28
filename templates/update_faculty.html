@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Update Faculty</h1>
+    <form method="POST" action="{{ url_for('update_faculty') }}">
+        <input type="hidden" name="institute_id" value="{{ faculty.institute_id }}">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="institute_id" class="form-label">Institute ID</label>
+                    <input type="text" class="form-control" id="institute_id" value="{{ faculty.institute_id }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ faculty.first_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ faculty.last_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth (YYYY-MM-DD)</label>
+                    <input type="date" class="form-control" id="dob" name="dob" value="{{ faculty.dob }}">
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="">Select</option>
+                        <option value="Male" {% if faculty.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if faculty.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if faculty.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Active" {% if faculty.status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="On Leave" {% if faculty.status == 'On Leave' %}selected{% endif %}>On Leave</option>
+                        <option value="Retired" {% if faculty.status == 'Retired' %}selected{% endif %}>Retired</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="personal_email" class="form-label">Personal Email</label>
+                    <input type="email" class="form-control" id="personal_email" name="personal_email" value="{{ faculty.personal_email }}">
+                </div>
+                <div class="mb-3">
+                    <label for="college_email" class="form-label">College Email</label>
+                    <input type="email" class="form-control" id="college_email" name="college_email" value="{{ faculty.college_email }}">
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ faculty.phone }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="department_id" class="form-label">Department</label>
+                    <select class="form-select" id="department_id" name="department_id" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.department_id }}" {% if faculty.department_id == dept.department_id %}selected{% endif %}>{{ dept.department_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="joining_year" class="form-label">Joining Year</label>
+                    <input type="text" class="form-control" id="joining_year" name="joining_year" value="{{ faculty.joining_year }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="leaving_year" class="form-label">Leaving Year (optional)</label>
+                    <input type="text" class="form-control" id="leaving_year" name="leaving_year" value="{{ faculty.leaving_year }}">
+                </div>
+                <div class="mb-3">
+                    <label for="house_no" class="form-label">House No</label>
+                    <input type="text" class="form-control" id="house_no" name="house_no" value="{{ faculty.house_no }}">
+                </div>
+                <div class="mb-3">
+                    <label for="lane" class="form-label">Lane</label>
+                    <input type="text" class="form-control" id="lane" name="lane" value="{{ faculty.lane }}">
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ faculty.city }}">
+                </div>
+                <div class="mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="state" name="state" value="{{ faculty.state }}">
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ faculty.country }}">
+                </div>
+                <div class="mb-3">
+                    <label for="pincode" class="form-label">Pincode</label>
+                    <input type="text" class="form-control" id="pincode" name="pincode" value="{{ faculty.pincode }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-warning">Update Faculty</button>
+        <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

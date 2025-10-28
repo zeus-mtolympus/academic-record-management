@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Add Student</h1>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="institute_id" class="form-label">Institute ID</label>
+                    <input type="text" class="form-control" id="institute_id" name="institute_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="roll_no" class="form-label">Roll No</label>
+                    <input type="text" class="form-control" id="roll_no" name="roll_no" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="fname" name="fname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lname" name="lname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth (YYYY-MM-DD)</label>
+                    <input type="date" class="form-control" id="dob" name="dob" required>
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Studying">Studying</option>
+                        <option value="Graduated">Graduated</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="personal_email" class="form-label">Personal Email</label>
+                    <input type="email" class="form-control" id="personal_email" name="personal_email">
+                </div>
+                <div class="mb-3">
+                    <label for="college_email" class="form-label">College Email</label>
+                    <input type="email" class="form-control" id="college_email" name="college_email">
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phone" name="phone">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="department_id" class="form-label">Department</label>
+                    <select class="form-select" id="department_id" name="department_id" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.department_id }}">{{ dept.department_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="batch" class="form-label">Batch</label>
+                    <input type="text" class="form-control" id="batch" name="batch" required>
+                </div>
+                <div class="mb-3">
+                    <label for="house_no" class="form-label">House No</label>
+                    <input type="text" class="form-control" id="house_no" name="house_no">
+                </div>
+                <div class="mb-3">
+                    <label for="lane" class="form-label">Lane</label>
+                    <input type="text" class="form-control" id="lane" name="lane">
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city">
+                </div>
+                <div class="mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="state" name="state">
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country">
+                </div>
+                <div class="mb-3">
+                    <label for="pincode" class="form-label">Pincode</label>
+                    <input type="text" class="form-control" id="pincode" name="pincode">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Add Student</button>
+        <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

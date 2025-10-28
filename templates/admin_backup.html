@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Backup Data</h1>
+    <p>Select the tables you want to include in the backup CSV file:</p>
+    
+    <form method="POST">
+        <!-- Other Tables Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#otherSection" aria-expanded="true" aria-controls="otherSection">
+                        Main Tables <span class="badge bg-secondary ms-2">{{ other_tables|length }}</span>
+                    </button>
+                </h5>
+            </div>
+            <div id="otherSection" class="collapse show">
+                <div class="card-body">
+                    <div class="row">
+                        {% for table in other_tables %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ table }}" id="{{ table }}" name="tables">
+                                <label class="form-check-label" for="{{ table }}">
+                                    {{ table.capitalize() }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not other_tables %}
+                        <div class="col-12"><small class="text-muted">No other tables found.</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Tables Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#attendanceSection" aria-expanded="true" aria-controls="attendanceSection">
+                        Attendance Tables <span class="badge bg-primary ms-2">{{ attendance_tables|length }}</span>
+                    </button>
+                </h5>
+            </div>
+            <div id="attendanceSection" class="collapse show">
+                <div class="card-body">
+                    <div class="row">
+                        {% for table in attendance_tables %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ table }}" id="{{ table }}" name="tables">
+                                <label class="form-check-label" for="{{ table }}">
+                                    {{ table.capitalize() }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not attendance_tables %}
+                        <div class="col-12"><small class="text-muted">No attendance-related tables found.</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Marks Tables Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#marksSection" aria-expanded="true" aria-controls="marksSection">
+                        Marks Tables <span class="badge bg-primary ms-2">{{ marks_tables|length }}</span>
+                    </button>
+                </h5>
+            </div>
+            <div id="marksSection" class="collapse show">
+                <div class="card-body">
+                    <div class="row">
+                        {% for table in marks_tables %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ table }}" id="{{ table }}" name="tables">
+                                <label class="form-check-label" for="{{ table }}">
+                                    {{ table.capitalize() }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not marks_tables %}
+                        <div class="col-12"><small class="text-muted">No marks-related tables found.</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reports Tables Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#reportsSection" aria-expanded="true" aria-controls="reportsSection">
+                        Reports Tables <span class="badge bg-primary ms-2">{{ reports_tables|length }}</span>
+                    </button>
+                </h5>
+            </div>
+            <div id="reportsSection" class="collapse show">
+                <div class="card-body">
+                    <div class="row">
+                        {% for table in reports_tables %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ table }}" id="{{ table }}" name="tables">
+                                <label class="form-check-label" for="{{ table }}">
+                                    {{ table.capitalize() }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not reports_tables %}
+                        <div class="col-12"><small class="text-muted">No reports-related tables found.</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if not tables %}
+        <div class="alert alert-warning">
+            No tables found in the database.
+        </div>
+        {% endif %}
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary" {% if not tables %}disabled{% endif %}>
+                <i class="fas fa-download"></i> Download Selected Tables as CSV
+            </button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS for collapse functionality (add if not in base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

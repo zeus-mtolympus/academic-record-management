@@ -1,0 +1,62 @@
+<!-- Updated admin_dashboard.html - replace existing with black text, blue icons, and blue borders -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-dark">Admin Dashboard</h1>
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">User Management</h5>
+                <a href="{{ url_for('manage_users') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">Courses Management</h5>
+                <a href="{{ url_for('manage_courses') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-user-graduate fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">Enrollment Management</h5>
+                <a href="{{ url_for('manage_enrollments') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">Report Generation</h5>
+                <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-download fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">Backup Data</h5>
+                <a href="{{ url_for('admin_backup') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-key fa-3x text-primary mb-3"></i>
+                <h5 class="card-title text-dark">Change Password</h5>
+                <a href="{{ url_for('change_password') }}" class="btn btn-outline-primary">Go</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

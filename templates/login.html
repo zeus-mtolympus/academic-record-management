@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Hogwarts College Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-body p-4 text-center">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="College Portal Logo" class="img-fluid mb-3" style="max-height: 350px; max-width: 100%;">
+                <h2 class="card-title mb-4"><i class="fas fa-sign-in-alt me-2"></i>Login</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login <i class="fas fa-arrow-right ms-1"></i></button>
+                </form>
+                <div class="text-center mt-3">
+                    <small class="text-muted">Need an account? Contact admin.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

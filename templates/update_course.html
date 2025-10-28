@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Update Course</h1>
+    <form method="POST" action="{{ url_for('update_course') }}">
+        <input type="hidden" name="course_id" value="{{ course.course_id }}">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="course_id" class="form-label">Course ID</label>
+                    <input type="text" class="form-control" id="course_id" value="{{ course.course_id }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ course.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="semester" class="form-label">Semester</label>
+                    <select class="form-select" id="semester" name="semester" required>
+                        <option value="">Select Semester</option>
+                        <option value="Odd" {% if course.semester == 'Odd' %}selected{% endif %}>Odd</option>
+                        <option value="Even" {% if course.semester == 'Even' %}selected{% endif %}>Even</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="year" class="form-label">Year</label>
+                    <input type="number" class="form-control" id="year" name="year" value="{{ course.year }}" min="1" max="4" required>
+                </div>
+                <div class="mb-3">
+                    <label for="department_id" class="form-label">Department</label>
+                    <select class="form-select" id="department_id" name="department_id" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.department_id }}" {% if course.department_id == dept.department_id %}selected{% endif %}>{{ dept.department_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="credits" class="form-label">Credits</label>
+                    <input type="number" class="form-control" id="credits" name="credits" value="{{ course.credits }}" min="1" max="6">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="faculty_id" class="form-label">Faculty (optional)</label>
+                    <select class="form-select" id="faculty_id" name="faculty_id">
+                        <option value="">No Faculty Assigned</option>
+                        {% for fac in faculty %}
+                        <option value="{{ fac.faculty_id }}" {% if course.faculty_id == fac.faculty_id %}selected{% endif %}>{{ fac.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-warning">Update Course</button>
+        <a href="{{ url_for('manage_courses') }}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

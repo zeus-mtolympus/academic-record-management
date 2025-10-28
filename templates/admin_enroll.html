@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Enrollment Management</h1>
+    
+    <!-- Action Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus fa-3x text-success mb-3"></i>
+                    <h5 class="card-title text-dark">Add Enrollments</h5>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="add">
+                        <button type="submit" class="btn btn-outline-success text-dark">Proceed to Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title text-dark">Delete Enrollments</h5>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn btn-outline-danger text-dark">Proceed to Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toggle Button for Enrollments Table -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button class="btn btn-outline-primary text-dark w-100" type="button" data-bs-toggle="collapse" data-bs-target="#enrollmentsTable" aria-expanded="false" aria-controls="enrollmentsTable">
+                <i class="fas fa-table me-2"></i> Show All Enrollments
+            </button>
+        </div>
+    </div>
+    
+    <!-- Enrollments Table (collapsible, hidden by default) -->
+    <div class="collapse" id="enrollmentsTable">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-dark">All Enrollments</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-dark">Roll No</th>
+                                <th class="text-dark">Institute ID</th>
+                                <th class="text-dark">Course ID</th>
+                                <th class="text-dark">Course Name</th>
+                                <th class="text-dark">Semester</th>
+                                <th class="text-dark">Year</th>
+                                <th class="text-dark">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enrollment in enrollments %}
+                            <tr>
+                                <td class="text-dark">{{ enrollment.roll_no }}</td>
+                                <td class="text-dark">{{ enrollment.institute_id }}</td>
+                                <td class="text-dark">{{ enrollment.course_id }}</td>
+                                <td class="text-dark">{{ enrollment.course_name or enrollment.course_id }}</td>
+                                <td class="text-dark">{{ enrollment.semester }}</td>
+                                <td class="text-dark">{{ enrollment.year }}</td>
+                                <td class="text-dark">{{ enrollment.status }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

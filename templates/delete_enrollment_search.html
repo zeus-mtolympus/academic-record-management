@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Delete Enrollments</h1>
+    {% if enrollments %}
+    <form method="POST" action="{{ url_for('delete_enrollment') }}">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-dark"><input type="checkbox" id="select_all"></th>
+                        <th class="text-dark">Roll No</th>
+                        <th class="text-dark">Institute ID</th>
+                        <th class="text-dark">Course ID</th>
+                        <th class="text-dark">Course Name</th>
+                        <th class="text-dark">Semester</th>
+                        <th class="text-dark">Year</th>
+                        <th class="text-dark">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td><input type="checkbox" name="enrollments" value="{{ enrollment.course_id }}|{{ enrollment.institute_id }}"></td>
+                        <td class="text-dark">{{ enrollment.roll_no }}</td>
+                        <td class="text-dark">{{ enrollment.institute_id }}</td>
+                        <td class="text-dark">{{ enrollment.course_id }}</td>
+                        <td class="text-dark">{{ enrollment.course_name or enrollment.course_id }}</td>
+                        <td class="text-dark">{{ enrollment.semester }}</td>
+                        <td class="text-dark">{{ enrollment.year }}</td>
+                        <td class="text-dark">{{ enrollment.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="submit" class="btn btn-danger text-dark" onclick="return confirm('Delete selected enrollments?')">Delete Selected</button>
+        <a href="{{ url_for('manage_enrollments') }}" class="btn btn-secondary">Back</a>
+    </form>
+    {% else %}
+    <form method="POST">
+        <div class="mb-3">
+            <label for="institute_id" class="form-label text-dark">Institute ID</label>
+            <input type="text" class="form-control" id="institute_id" name="institute_id" required>
+        </div>
+        <button type="submit" class="btn btn-danger text-dark">Search for Delete</button>
+        <a href="{{ url_for('manage_enrollments') }}" class="btn btn-secondary">Back</a>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('select_all').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('input[name="enrollments"]');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+<!-- Updated admin_courses.html - replace existing with hidden table by default -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Courses Management</h1>
+    
+    <!-- Action Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus fa-3x text-success mb-3"></i>
+                    <h5 class="card-title text-dark">Add New Course</h5>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="add">
+                        <button type="submit" class="btn btn-outline-success text-dark">Go</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100 border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title text-dark">Update Course</h5>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="update">
+                        <button type="submit" class="btn btn-outline-warning text-dark">Go</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100 border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title text-dark">Delete Course</h5>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn btn-outline-danger text-dark">Go</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toggle Button for Courses Table -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button class="btn btn-outline-primary text-dark w-100" type="button" data-bs-toggle="collapse" data-bs-target="#coursesTable" aria-expanded="false" aria-controls="coursesTable">
+                <i class="fas fa-table me-2"></i> Show All Courses
+            </button>
+        </div>
+    </div>
+    
+    <!-- Courses Table (collapsible, hidden by default) -->
+    <div class="collapse" id="coursesTable">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-dark">All Courses</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-dark">Course ID</th>
+                                <th class="text-dark">Name</th>
+                                <th class="text-dark">Semester</th>
+                                <th class="text-dark">Year</th>
+                                <th class="text-dark">Department</th>
+                                <th class="text-dark">Credits</th>
+                                <th class="text-dark">Faculty</th>
+                                <th class="text-dark">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                            <tr>
+                                <td class="text-dark">{{ course.course_id }}</td>
+                                <td class="text-dark">{{ course.name }}</td>
+                                <td class="text-dark">{{ course.semester }}</td>
+                                <td class="text-dark">{{ course.year }}</td>
+                                <td class="text-dark">{{ course.dept_name or course.department_id }}</td>
+                                <td class="text-dark">{{ course.credits }}</td>
+                                <td class="text-dark">{{ course.faculty_name or 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('update_course_search') }}?course_id={{ course.course_id }}" class="btn btn-sm btn-outline-warning text-dark">Edit</a>
+                                    <button onclick="confirmDelete('{{ course.course_id }}', '{{ course.name }}')" class="btn btn-sm btn-outline-danger text-dark">Delete</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(courseId, courseName) {
+    if (confirm(`Are you sure you want to delete course "${courseName}" (${courseId})? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("delete_course") }}';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'course_id';
+        input.value = courseId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

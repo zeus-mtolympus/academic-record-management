@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-chalkboard-teacher me-2 text-success"></i>Faculty Dashboard</h1>
+        <p>Welcome, {{ username }}! Handle courses and students.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-3x text-success mb-3"></i>
+                <h5 class="card-title">My Courses</h5>
+                <p class="card-text">View assigned courses.</p>
+                <a href="#" class="btn btn-outline-success">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-list fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Mark Attendance</h5>
+                <p class="card-text">Update student attendance.</p>
+                <a href="#" class="btn btn-outline-warning">Update</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-star fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Enter Grades</h5>
+                <p class="card-text">Input student marks.</p>
+                <a href="#" class="btn btn-outline-info">Enter</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-3x text-secondary mb-3"></i>
+                <h5 class="card-title">Student Reports</h5>
+                <p class="card-text">View progress.</p>
+                <a href="#" class="btn btn-outline-secondary">View</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
