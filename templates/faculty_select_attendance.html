@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Select Course and Date for Attendance</h1>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="course_id" class="form-label">Assigned Courses</label>
+                <select class="form-select" id="course_id" name="course_id" required>
+                    <option value="">Select a Course</option>
+                    {% for course in courses %}
+                    <option value="{{ course.course_id }}">{{ course.name }} ({{ course.course_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="year" class="form-label">Year</label>
+                <input type="number" class="form-control" id="year" name="year" value="{{ current_year }}" required min="2000" max="{{ current_year + 1 }}">
+            </div>
+            <div class="col-md-4">
+                <label for="date" class="form-label">Date (YYYY-MM-DD)</label>
+                <input type="date" class="form-control" id="date" name="date" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Proceed to Attendance Marking</button>
+        <a href="{{ url_for('faculty_dashboard') }}" class="btn btn-secondary mt-3">Back</a>
+    </form>
+</div>
+{% endblock %}

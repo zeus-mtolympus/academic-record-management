@@ -600,9 +600,9 @@ def update_course_search():
         course = cur.execute("SELECT * FROM courses WHERE course_id = ?", (course_id,)).fetchone()
         
         # Fetch related data for form
-        cur.execute("SELECT department_id, name FROM departments")
+        cur.execute("SELECT department_id, department_name FROM departments")
         departments = cur.fetchall()
-        cur.execute("SELECT institute_id as faculty_id, first_name || ' ' || last_name as name FROM faculty")
+        cur.execute("SELECT institute_id as faculty_id, fname || ' ' || lname as name FROM faculty")
         faculty = cur.fetchall()
         
         college_conn.close()
@@ -989,12 +989,298 @@ def admin_backup():
     college_conn.close()
     return render_template("admin_backup.html", tables=all_tables, attendance_tables=attendance_tables, marks_tables=marks_tables, reports_tables=reports_tables, other_tables=other_tables)
 
+# Updated faculty_dashboard route - replace existing
 @app.route("/faculty")
 def faculty_dashboard():
     if "username" not in session or session["type"] != "Faculty":
         flash("Unauthorized access! Please log in as faculty.", "danger")
         return redirect(url_for("login"))
-    return render_template("faculty_dashboard.html", username=session["username"])
+    
+    # Fetch faculty's assigned courses for display (optional preview)
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT c.course_id, c.name 
+        FROM courses c 
+        WHERE c.faculty_id = ?
+    """, (session["username"],))
+    assigned_courses = cur.fetchall()
+    college_conn.close()
+    
+    return render_template("faculty_dashboard.html", username=session["username"], assigned_courses=assigned_courses)
+
+# Updated faculty_manage_marks route - replace existing (add year selection)
+@app.route("/faculty/manage_marks", methods=["GET", "POST"])
+def faculty_manage_marks():
+    if "username" not in session or session["type"] != "Faculty":
+        return redirect(url_for("login"))
+    
+    current_year = datetime.now().year
+    
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        year = int(request.form["year"])
+        semester = request.form["semester"]
+        # Redirect to marks entry with selected year and semester
+        return redirect(url_for("faculty_enter_marks", course_id=course_id, year=year, semester=semester))
+    
+    # GET: Fetch assigned courses
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT c.course_id, c.name 
+        FROM courses c 
+        WHERE c.faculty_id = ?
+    """, (session["username"],))
+    courses = cur.fetchall()
+    college_conn.close()
+    
+    if not courses:
+        flash("No courses assigned to you.", "warning")
+    
+    return render_template("faculty_select_marks.html", courses=courses, current_year=current_year)
+
+# No changes to faculty_enter_marks (already uses passed year)
+
+# # Updated faculty_enter_marks route - replace existing (only update existing records, skip new inserts)
+@app.route("/faculty/enter_marks/<course_id>/<int:year>/<semester>", methods=["GET", "POST"])
+def faculty_enter_marks(course_id, year, semester):
+    if "username" not in session or session["type"] != "Faculty":
+        return redirect(url_for("login"))
+    
+    # Verify faculty is assigned to this course
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("SELECT faculty_id FROM courses WHERE course_id = ?", (course_id,))
+    course = cur.fetchone()
+    if not course or course['faculty_id'] != session["username"]:
+        flash("You are not assigned to this course.", "danger")
+        college_conn.close()
+        return redirect(url_for("faculty_dashboard"))
+    
+    marks_table = f"marks_{course_id}_{year}_{semester}"
+    
+    if request.method == "POST":
+        # Group changes by roll_no to build full row
+        student_updates = {}
+        for key, value in request.form.items():
+            if key.startswith("internal_marks_"):
+                roll_no = key.split("_")[-1]
+                student_updates.setdefault(roll_no, {})
+                student_updates[roll_no]['internal_marks'] = float(value) if value else None
+            elif key.startswith("external_marks_"):
+                roll_no = key.split("_")[-1]
+                student_updates.setdefault(roll_no, {})
+                student_updates[roll_no]['external_marks'] = float(value) if value else None
+            elif key.startswith("grade_"):
+                roll_no = key.split("_")[-1]
+                student_updates.setdefault(roll_no, {})
+                student_updates[roll_no]['grade'] = value if value else None
+        
+        updated_count = 0
+        # For each student, fetch existing row if any, merge changes, then UPDATE only if exists
+        for roll_no, changes in student_updates.items():
+            # Fetch existing
+            try:
+                cur.execute(f"SELECT * FROM {marks_table} WHERE roll_no = ?", (roll_no,))
+                existing = cur.fetchone()
+                if existing:
+                    # Existing row found: Merge changes and UPDATE full row
+                    for field in ['internal_marks', 'external_marks', 'grade']:
+                        if field not in changes:
+                            changes[field] = existing[field]
+                    # Ensure institute_id is preserved
+                    changes['institute_id'] = existing['institute_id']
+                    
+                    # UPDATE the existing row
+                    cur.execute(f"""
+                        UPDATE {marks_table} 
+                        SET institute_id = ?, internal_marks = ?, external_marks = ?, grade = ? 
+                        WHERE roll_no = ?
+                    """, (changes['institute_id'], changes.get('internal_marks'), changes.get('external_marks'), changes.get('grade'), roll_no))
+                    updated_count += 1
+                else:
+                    # No existing row: Skip (no new insert)
+                    continue
+            except sqlite3.OperationalError:
+                # Table doesn't exist or no row: Skip
+                continue
+        
+        if updated_count > 0:
+            college_conn.commit()
+            flash(f"Marks updated for {updated_count} existing records in {course_id} ({year} - {semester})!", "success")
+        else:
+            flash("No existing marks records found to update.", "info")
+        college_conn.close()
+        return redirect(url_for("faculty_dashboard"))
+    
+    # GET: Fetch enrolled students for this year, roll_no, and current marks from dynamic table
+    cur.execute("""
+        SELECT s.roll_no, s.institute_id, s.fname || ' ' || s.lname AS name
+        FROM students s 
+        LEFT JOIN enrollments e ON s.institute_id = e.institute_id AND e.year = ?
+        WHERE e.course_id = ?
+    """, (year, course_id))
+    students_base = cur.fetchall()
+    
+    students = []
+    for student in students_base:
+        try:
+            cur.execute(f"""
+                SELECT internal_marks, external_marks, grade 
+                FROM {marks_table} 
+                WHERE roll_no = ?
+            """, (student['roll_no'],))
+            marks_row = cur.fetchone()
+            students.append({
+                'roll_no': student['roll_no'],
+                'institute_id': student['institute_id'],
+                'name': student['name'],
+                'internal_marks': marks_row['internal_marks'] if marks_row else None,
+                'external_marks': marks_row['external_marks'] if marks_row else None,
+                'grade': marks_row['grade'] if marks_row else None
+            })
+        except sqlite3.OperationalError:
+            # Table doesn't exist yet - no marks
+            students.append({
+                'roll_no': student['roll_no'],
+                'institute_id': student['institute_id'],
+                'name': student['name'],
+                'internal_marks': None,
+                'external_marks': None,
+                'grade': None
+            })
+    
+    # Fetch course name
+    cur.execute("SELECT name FROM courses WHERE course_id = ?", (course_id,))
+    course_result = cur.fetchone()
+    course_name = course_result['name'] if course_result else "Unknown"
+    
+    college_conn.close()
+    return render_template("faculty_marks.html", course_id=course_id, course_name=course_name, year=year, semester=semester, students=students)
+
+# No changes needed for attendance (INSERT OR REPLACE is fine since only status per date/roll_no; no multiple fields to preserve)
+
+# Updated faculty_mark_attendance route - replace existing (ensure year is passed and used)
+@app.route("/faculty/mark_attendance", methods=["GET", "POST"])
+def faculty_mark_attendance():
+    if "username" not in session or session["type"] != "Faculty":
+        return redirect(url_for("login"))
+    
+    current_year = datetime.now().year
+    
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        year = int(request.form["year"])
+        date_str = request.form["date"]
+        if not date_str:
+            flash("Please select a date.", "danger")
+        else:
+            # Redirect to attendance marking with selected year
+            return redirect(url_for("faculty_enter_attendance", course_id=course_id, year=year, date=date_str))
+    
+    # GET: Fetch assigned courses
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT c.course_id, c.name 
+        FROM courses c 
+        WHERE c.faculty_id = ?
+    """, (session["username"],))
+    courses = cur.fetchall()
+    college_conn.close()
+    
+    if not courses:
+        flash("No courses assigned to you.", "warning")
+    
+    return render_template("faculty_select_attendance.html", courses=courses, current_year=current_year)
+
+# Updated faculty_enter_attendance route - replace existing (remove institute_id from attendance INSERT, assume schema has only roll_no, date, status)
+@app.route("/faculty/enter_attendance/<course_id>/<int:year>/<date>", methods=["GET", "POST"])
+def faculty_enter_attendance(course_id, year, date):
+    if "username" not in session or session["type"] != "Faculty":
+        return redirect(url_for("login"))
+    
+    # Verify faculty is assigned to this course
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("SELECT faculty_id FROM courses WHERE course_id = ?", (course_id,))
+    course = cur.fetchone()
+    if not course or course['faculty_id'] != session["username"]:
+        flash("You are not assigned to this course.", "danger")
+        college_conn.close()
+        return redirect(url_for("faculty_dashboard"))
+    
+    attendance_table = f"attendance_{course_id}_{year}"
+    
+    if request.method == "POST":
+        # Update attendance for each student (only status; updates if exists via OR REPLACE)
+        for key, status in request.form.items():
+            if key.startswith("attendance_"):
+                roll_no = key.split("_")[-1]  # Last part is roll_no
+                # Before the execute, check if row exists for this roll_no and date
+                cur.execute(f"""
+                    SELECT 1 FROM {attendance_table} WHERE roll_no = ? AND date = ?
+                """, (roll_no, date))
+                exists = cur.fetchone() is not None
+
+                if exists:
+                    # Update existing row
+                    cur.execute(f"""
+                        UPDATE {attendance_table} 
+                        SET status = ? 
+                        WHERE roll_no = ? AND date = ?
+                    """, (status, roll_no, date))
+                else:
+                    # Insert new row
+                    cur.execute(f"""
+                        INSERT INTO {attendance_table} (roll_no, date, status) 
+                        VALUES (?, ?, ?)
+                    """, (roll_no, date, status))
+        college_conn.commit()
+        flash(f"Attendance updated for {course_id} ({year}) on {date} successfully!", "success")
+        college_conn.close()
+        return redirect(url_for("faculty_dashboard"))
+    
+    # GET: Fetch enrolled students for this year and current attendance from dynamic table (no institute_id fetch)
+    cur.execute("""
+        SELECT s.roll_no, s.fname || ' ' || s.lname AS name
+        FROM students s 
+        LEFT JOIN enrollments e ON s.institute_id = e.institute_id AND e.year = ?
+        WHERE e.course_id = ?
+    """, (year, course_id))
+    students_base = cur.fetchall()
+    
+    students = []
+    for student in students_base:
+        try:
+            cur.execute(f"""
+                SELECT status 
+                FROM {attendance_table} 
+                WHERE roll_no = ? AND date = ?
+            """, (student['roll_no'], date))
+            att_row = cur.fetchone()
+            students.append({
+                'roll_no': student['roll_no'],
+                'name': student['name'],
+                'attendance_status': att_row['status'] if att_row else 'Not Marked'
+            })
+        except sqlite3.OperationalError:
+            # Table doesn't exist yet - new entry
+            students.append({
+                'roll_no': student['roll_no'],
+                'name': student['name'],
+                'attendance_status': 'Not Marked'
+            })
+    
+    # Fetch course name
+    cur.execute("SELECT name FROM courses WHERE course_id = ?", (course_id,))
+    course_result = cur.fetchone()
+    course_name = course_result['name'] if course_result else "Unknown"
+    
+    college_conn.close()
+    return render_template("faculty_attendance.html", course_id=course_id, course_name=course_name, year=year, date=date, students=students)
+
 
 @app.route("/student")
 def student_dashboard():

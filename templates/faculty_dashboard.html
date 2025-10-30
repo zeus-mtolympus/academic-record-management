@@ -1,52 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Faculty Dashboard{% endblock %}
-
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="mb-4"><i class="fas fa-chalkboard-teacher me-2 text-success"></i>Faculty Dashboard</h1>
-        <p>Welcome, {{ username }}! Handle courses and students.</p>
+<div class="container mt-4">
+    <h1 class="text-dark">Faculty Dashboard</h1>
+    <p>Welcome, {{ username }}! Manage your assigned courses below.</p>
+    
+    {% if assigned_courses %}
+    <div class="alert alert-info">
+        <h6>Assigned Courses:</h6>
+        <ul class="mb-0">
+            {% for course in assigned_courses %}
+            <li>{{ course.name }} ({{ course.course_id }})</li>
+            {% endfor %}
+        </ul>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-book fa-3x text-success mb-3"></i>
-                <h5 class="card-title">My Courses</h5>
-                <p class="card-text">View assigned courses.</p>
-                <a href="#" class="btn btn-outline-success">View</a>
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title text-dark">Manage Marks</h5>
+                    <a href="{{ url_for('faculty_manage_marks') }}" class="btn btn-outline-primary">Go</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-clipboard-list fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Mark Attendance</h5>
-                <p class="card-text">Update student attendance.</p>
-                <a href="#" class="btn btn-outline-warning">Update</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-star fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Enter Grades</h5>
-                <p class="card-text">Input student marks.</p>
-                <a href="#" class="btn btn-outline-info">Enter</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-file-alt fa-3x text-secondary mb-3"></i>
-                <h5 class="card-title">Student Reports</h5>
-                <p class="card-text">View progress.</p>
-                <a href="#" class="btn btn-outline-secondary">View</a>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
+                    <h5 class="card-title text-dark">Mark Attendance</h5>
+                    <a href="{{ url_for('faculty_mark_attendance') }}" class="btn btn-outline-success">Go</a>
+                </div>
             </div>
         </div>
     </div>

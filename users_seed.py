@@ -104,11 +104,12 @@ def seed_from_faculty(conn_users):
     return count
 
 def seed_admin(conn_users):
-    username = "ADMIN01"
-    plain = f"{username}1234!"
-    hashed = hash_password(plain)
-    add_user(conn_users, username, hashed, "Admin")
-    print(f"[INFO] Admin user added — username: {username}, password: {plain}")
+    usernames = ["ADMIN01", "DUMBLEDORE"]
+    plains = [f"{username}1234!" for username in usernames]
+    for username, plain in zip(usernames, plains):
+        hashed = hash_password(plain)
+        add_user(conn_users, username, hashed, "Admin")
+        print(f"[INFO] Admin user added — username: {username}, password: {plain}")
 
 def main():
     if os.path.exists(USERS_DB):
