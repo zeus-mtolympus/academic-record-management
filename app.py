@@ -559,6 +559,7 @@ def add_course():
     
     if request.method == "POST":
         course_id = request.form["course_id"].strip()
+        course_code = course_id[:6]
         name = request.form["name"].strip()
         semester = request.form["semester"].strip()
         year = int(request.form["year"])
@@ -572,14 +573,21 @@ def add_course():
             try:
                 cur = college_conn.cursor()
                 cur.execute("""
-                    INSERT INTO courses (course_id, name, semester, year, department_id, credits, faculty_id) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (course_id, name, semester, year, department_id, credits, faculty_id))
+                    INSERT INTO courses (course_id, course_code, name, semester, year, department_id, credits, faculty_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (course_id, course_code, name, semester, year, department_id, credits, faculty_id))
                 college_conn.commit()
                 flash(f"Course {course_id} ({name}) added successfully!", "success")
                 return redirect(url_for("manage_courses"))
-            except sqlite3.IntegrityError:
-                flash("Course ID already exists.", "danger")
+            except sqlite3.IntegrityError as e:
+                flash(f"Integrity Error: {str(e)}. Check for duplicates or invalid IDs.", "danger")
+                # Optional: Print to console for dev
+                print(f"DB Error Details: {e} | Values: course_id={course_id}, dept={department_id}, fac={faculty_id}")
+            except ValueError as e:
+                flash(f"Value Error (e.g., invalid year): {str(e)}", "danger")
+            except Exception as e:
+                flash(f"Unexpected Error: {str(e)}", "danger")
+                print(f"Unexpected Error: {e}")  # Console log
         
         college_conn.close()
         return render_template("add_course.html", departments=departments, faculty=faculty)
@@ -1281,13 +1289,271 @@ def faculty_enter_attendance(course_id, year, date):
     college_conn.close()
     return render_template("faculty_attendance.html", course_id=course_id, course_name=course_name, year=year, date=date, students=students)
 
+# New route for changing faculty password - add this (similar to student)
+@app.route("/faculty/change_password", methods=["GET", "POST"])
+def faculty_change_password():
+    if "username" not in session or session["type"] != "Faculty":
+        return redirect(url_for("login"))
+    
+    if request.method == "POST":
+        old_password = request.form["old_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+        
+        if new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+            return render_template("faculty_change_password.html")
+        
+        if len(new_password) < 6:
+            flash("New password must be at least 6 characters.", "danger")
+            return render_template("faculty_change_password.html")
+        
+        # Verify old password
+        users_conn = get_users_connection()
+        cur = users_conn.cursor()
+        cur.execute("SELECT password FROM users WHERE username = ?", (session["username"],))
+        user = cur.fetchone()
+        if not user or not bcrypt.checkpw(old_password.encode("utf-8"), user['password'].encode("utf-8")):
+            flash("Old password is incorrect.", "danger")
+            users_conn.close()
+            return render_template("faculty_change_password.html")
+        
+        # Hash and update new password
+        hashed = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
+        cur.execute("UPDATE users SET password = ? WHERE username = ?", (hashed.decode("utf-8"), session["username"]))
+        users_conn.commit()
+        users_conn.close()
+        
+        flash("Password changed successfully!", "success")
+        return redirect(url_for("faculty_dashboard"))
+    
+    return render_template("faculty_change_password.html")
 
+# Updated student_dashboard route - replace existing (fetch enrolled courses for preview)
 @app.route("/student")
 def student_dashboard():
     if "username" not in session or session["type"] != "Student":
         flash("Unauthorized access! Please log in as a student.", "danger")
         return redirect(url_for("login"))
-    return render_template("student_dashboard.html", username=session["username"])
+    
+    # Fetch student's enrolled courses for display
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT c.course_id, c.name 
+        FROM enrollments e 
+        JOIN courses c ON e.course_id = c.course_id
+        WHERE e.institute_id = ?
+    """, (session["username"],))
+    enrolled_courses = cur.fetchall()
+    college_conn.close()
+    
+    return render_template("student_dashboard.html", username=session["username"], enrolled_courses=enrolled_courses)
+
+
+@app.route("/student/view_marks", methods=["GET", "POST"])
+def student_view_marks():
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    current_year = datetime.now().year
+    
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        year = int(request.form["year"])
+        semester = request.form["semester"]
+        return redirect(url_for("student_marks_detail", course_id=course_id, year=year, semester=semester))
+    
+    # Fetch enrolled courses
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT c.course_id, c.name 
+        FROM enrollments e 
+        JOIN courses c ON e.course_id = c.course_id
+        WHERE e.institute_id = ?
+    """, (session["username"],))
+    courses = cur.fetchall()
+    college_conn.close()
+    
+    if not courses:
+        flash("No courses enrolled.", "warning")
+    
+    return render_template("student_select_marks.html", courses=courses, current_year=current_year)
+
+# Updated student_marks_detail route - replace existing (dynamic table)
+@app.route("/student/marks_detail/<course_id>/<int:year>/<semester>")
+def student_marks_detail(course_id, year, semester):
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    marks_table = f"marks_{course_id}_{year}_{semester}"
+    
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    
+    # Fetch marks for this student from dynamic table
+    try:
+        cur.execute(f"""
+            SELECT internal_marks, external_marks, grade 
+            FROM {marks_table} 
+            WHERE roll_no = (SELECT roll_no FROM students WHERE institute_id = ?) 
+        """, (session["username"],))
+        marks_row = cur.fetchone()
+    except sqlite3.OperationalError:
+        # Table doesn't exist
+        marks_row = None
+    
+    # Fetch course name
+    cur.execute("SELECT name FROM courses WHERE course_id = ?", (course_id,))
+    course_result = cur.fetchone()
+    course_name = course_result['name'] if course_result else "Unknown"
+    
+    college_conn.close()
+    return render_template("student_marks.html", course_id=course_id, course_name=course_name, year=year, semester=semester, marks=marks_row)
+
+# Updated student_view_attendance route - replace existing (add year selection)
+@app.route("/student/view_attendance", methods=["GET", "POST"])
+def student_view_attendance():
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    current_year = datetime.now().year
+    
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        year = int(request.form["year"])
+        return redirect(url_for("student_attendance_detail", course_id=course_id, year=year))
+    
+    # Fetch enrolled courses
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT c.course_id, c.name 
+        FROM enrollments e 
+        JOIN courses c ON e.course_id = c.course_id
+        WHERE e.institute_id = ?
+    """, (session["username"],))
+    courses = cur.fetchall()
+    college_conn.close()
+    
+    if not courses:
+        flash("No courses enrolled.", "warning")
+    
+    return render_template("student_select_attendance.html", courses=courses, current_year=current_year)
+
+# Updated student_attendance_detail route - replace existing (pass present_days and total_days)
+@app.route("/student/attendance_detail/<course_id>/<int:year>")
+def student_attendance_detail(course_id, year):
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    attendance_table = f"attendance_{course_id}_{year}"
+    
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    
+    # Fetch roll_no for student
+    cur.execute("SELECT roll_no FROM students WHERE institute_id = ?", (session["username"],))
+    roll_no_row = cur.fetchone()
+    roll_no = roll_no_row['roll_no'] if roll_no_row else None
+    
+    if not roll_no:
+        flash("Student roll number not found.", "danger")
+        college_conn.close()
+        return redirect(url_for("student_view_attendance"))
+    
+    # Fetch attendance records for this student from dynamic table
+    try:
+        cur.execute(f"""
+            SELECT date, status 
+            FROM {attendance_table} 
+            WHERE roll_no = ?
+            ORDER BY date DESC
+        """, (roll_no,))
+        attendance_records = cur.fetchall()
+    except sqlite3.OperationalError:
+        # Table doesn't exist
+        attendance_records = []
+    
+    # Fetch course name
+    cur.execute("SELECT name FROM courses WHERE course_id = ?", (course_id,))
+    course_result = cur.fetchone()
+    course_name = course_result['name'] if course_result else "Unknown"
+    
+    # Calculate summary
+    total_days = len(attendance_records)
+    present_days = len([r for r in attendance_records if r['status'] == 'Present'])
+    attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
+    
+    college_conn.close()
+    return render_template("student_attendance.html", course_id=course_id, course_name=course_name, year=year, records=attendance_records, percentage=attendance_percentage, present_days=present_days, total_days=total_days)
+
+# New route for profile
+# Updated student_profile route - replace existing (add guardian fetch)
+@app.route("/student/profile")
+def student_profile():
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    college_conn = get_college_connection()
+    cur = college_conn.cursor()
+    cur.execute("""
+        SELECT * FROM students WHERE institute_id = ?
+    """, (session["username"],))
+    profile = cur.fetchone()
+    
+    # Fetch guardians (assume enrollments has 'id' as PRIMARY KEY; adjust join if schema differs)
+    cur.execute("""
+        SELECT sg.* FROM student_guardian sg
+        JOIN students s ON sg.institute_id = s.institute_id
+        WHERE s.institute_id = ?
+    """, (session["username"],))
+    guardians = cur.fetchall()
+    
+    college_conn.close()
+    
+    return render_template("student_profile.html", profile=profile, guardians=guardians)
+
+# New route for changing student password - add this
+@app.route("/student/change_password", methods=["GET", "POST"])
+def student_change_password():
+    if "username" not in session or session["type"] != "Student":
+        return redirect(url_for("login"))
+    
+    if request.method == "POST":
+        old_password = request.form["old_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+        
+        if new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+            return render_template("student_change_password.html")
+        
+        if len(new_password) < 6:
+            flash("New password must be at least 6 characters.", "danger")
+            return render_template("student_change_password.html")
+        
+        # Verify old password
+        users_conn = get_users_connection()
+        cur = users_conn.cursor()
+        cur.execute("SELECT password FROM users WHERE username = ?", (session["username"],))
+        user = cur.fetchone()
+        if not user or not bcrypt.checkpw(old_password.encode("utf-8"), user['password'].encode("utf-8")):
+            flash("Old password is incorrect.", "danger")
+            users_conn.close()
+            return render_template("student_change_password.html")
+        
+        # Hash and update new password
+        hashed = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
+        cur.execute("UPDATE users SET password = ? WHERE username = ?", (hashed.decode("utf-8"), session["username"]))
+        users_conn.commit()
+        users_conn.close()
+        
+        flash("Password changed successfully!", "success")
+        return redirect(url_for("student_dashboard"))
+    
+    return render_template("student_change_password.html")
 
 @app.route("/logout")
 def logout():

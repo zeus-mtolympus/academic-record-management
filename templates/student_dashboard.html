@@ -1,42 +1,56 @@
 {% extends "base.html" %}
 
-{% block title %}Student Dashboard{% endblock %}
-
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="mb-4"><i class="fas fa-user-graduate me-2 text-info"></i>Student Dashboard</h1>
-        <p>Welcome, {{ username }}! Track your academic progress.</p>
+<div class="container mt-4">
+    <h1 class="text-dark">Student Dashboard</h1>
+    <p>Welcome, {{ username }}! Access your academic information below.</p>
+    
+    {% if enrolled_courses %}
+    <div class="alert alert-info">
+        <h6>Enrolled Courses:</h6>
+        <ul class="mb-0">
+            {% for course in enrolled_courses %}
+            <li>{{ course.name }} ({{ course.course_id }})</li>
+            {% endfor %}
+        </ul>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <i class="fas fa-calendar-check fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Attendance</h5>
-                <p class="card-text">View your attendance records.</p>
-                <a href="#" class="btn btn-outline-info">Check</a>
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title text-dark">Check Marks</h5>
+                    <a href="{{ url_for('student_view_marks') }}" class="btn btn-outline-primary">Go</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Grades</h5>
-                <p class="card-text">See your marks and SGPA.</p>
-                <a href="#" class="btn btn-outline-warning">View</a>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow h-100 border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
+                    <h5 class="card-title text-dark">Check Attendance</h5>
+                    <a href="{{ url_for('student_view_attendance') }}" class="btn btn-outline-info">Go</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Progress Report</h5>
-                <p class="card-text">Semester-wise reports.</p>
-                <a href="#" class="btn btn-outline-success">Download</a>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow h-100 border-secondary">
+                <div class="card-body text-center">
+                    <i class="fas fa-user fa-3x text-secondary mb-3"></i>
+                    <h5 class="card-title text-dark">Overall Profile</h5>
+                    <a href="{{ url_for('student_profile') }}" class="btn btn-outline-secondary">Go</a>
+                </div>
+            </div>
+        </div>
+                <div class="col-md-3 mb-4">
+            <div class="card shadow h-100 border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-key fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title text-dark">Change Password</h5>
+                    <a href="{{ url_for('student_change_password') }}" class="btn btn-outline-warning">Go</a>
+                </div>
             </div>
         </div>
     </div>

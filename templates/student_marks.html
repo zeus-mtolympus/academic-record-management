@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Your Marks in {{ course_name }} ({{ course_id }}) - {{ year }} {{ semester }}</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-dark">Internal Marks</h5>
+                    <p class="card-text fs-4">{{ marks.internal_marks if marks else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-dark">External Marks</h5>
+                    <p class="card-text fs-4">{{ marks.external_marks if marks else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-dark">Grade</h5>
+                    <p class="card-text fs-4">{{ marks.grade if marks else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-3">
+        <a href="{{ url_for('student_view_marks') }}" class="btn btn-primary">View Other</a>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}

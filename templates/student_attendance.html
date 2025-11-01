@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-dark">Your Attendance in {{ course_name }} ({{ course_id }}) - {{ year }}</h1>
+    <div class="alert alert-info">
+        <strong>Attendance Percentage:</strong> {{ "%.2f"|format(percentage) }}% ({{ present_days }} / {{ total_days if total_days else 0 }} {{ 'days' if total_days else '' }})
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td><span class="badge bg-{{ 'success' if record.status == 'Present' else 'danger' if record.status == 'Absent' else 'warning' }}">{{ record.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-3">
+        <a href="{{ url_for('student_view_attendance') }}" class="btn btn-primary">View Other</a>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}
