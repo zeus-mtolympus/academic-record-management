@@ -1,26 +1,51 @@
-# 🏫 Student Academic Record Manager
+# 🎓 Student Academic Record Manager
 
-The **Student Academic Record Manager** is a Flask-based web application designed for colleges to manage student and faculty academic records efficiently. It provides features to add, update, delete, and search records, with support for automatically generating dummy data using the Faker library.
-
----
-
-## 🚀 Features
-
-- Add, update, and delete student and faculty records
-- Search for records quickly with user-friendly UI
-- Uses **SQLite3** for lightweight database storage
-- **Dummy data generation** (up to 4 entries) using Faker
-- Simple and clean web interface using HTML templates
+A **Flask-based full-stack web application** for colleges to manage student, faculty, course, marks, and attendance records.  
+The system supports authentication, role-based dashboards, record editing, searching, and automated dummy data generation using the **Faker** library.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Features
 
-| Component | Technology |
-|----------|------------|
-| Backend  | Python (Flask) |
-| Database | SQLite3 |
-| Frontend | HTML / CSS |
-| Data Generation | Faker Library |
+### 👨‍🎓 Student Module
+- Student Login & Profile View
+- View Courses Enrolled
+- View Marks & SGPA Records
+- View Attendance Reports
+- Change Password Option
+
+### 👨‍🏫 Faculty Module
+- Faculty Login & Profile View
+- Manage Students (Add / Update / Delete)
+- Manage Courses & Departments
+- Enter & Update Student Marks
+- Enter & Update Attendance
+
+### 🗄 System Features
+- Built using **Python Flask + SQLite3**
+- Searches and Filters for Records
+- Organized Templates for UI
+- Dummy Data Generators for:
+  - Departments
+  - Courses
+  - Students
+  - Faculty
+  - Attendance
+  - Marks
+  - SGPA Calculations
 
 ---
+
+## 🛠 Tech Stack
+
+| Layer        | Technology           |
+|-------------|----------------------|
+| Backend     | Python (Flask)       |
+| Database    | SQLite3 (`college.db`, `users.db`) |
+| Frontend    | HTML, CSS (Templates)|
+| Fake Data   | Faker Library        |
+
+---
+
+## 📂 Folder Structure
+
