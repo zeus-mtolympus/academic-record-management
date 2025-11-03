@@ -36,24 +36,20 @@
                     </select>
                 </div>
                 <div class="mb-3">
+                    <label for="pemail" class="form-label">Personal Email</label>
+                    <input type="text" class="form-control" id="pemail" name="pemail" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Personal Phone</label>
+                    <input type="text" class="form-control" id="phone" name="phone" required>
+                </div>
+                <div class="mb-3">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status" required>
                         <option value="Active">Active</option>
                         <option value="Studying">Studying</option>
                         <option value="Graduated">Graduated</option>
                     </select>
-                </div>
-                <div class="mb-3">
-                    <label for="personal_email" class="form-label">Personal Email</label>
-                    <input type="email" class="form-control" id="personal_email" name="personal_email">
-                </div>
-                <div class="mb-3">
-                    <label for="college_email" class="form-label">College Email</label>
-                    <input type="email" class="form-control" id="college_email" name="college_email">
-                </div>
-                <div class="mb-3">
-                    <label for="phone" class="form-label">Phone</label>
-                    <input type="tel" class="form-control" id="phone" name="phone">
                 </div>
             </div>
             <div class="col-md-6">
@@ -96,6 +92,69 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Guardian Section (optional) -->
+        <h3 class="mt-4">Guardian Information (Optional)</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="guardian_name" class="form-label">Guardian Name</label>
+                    <input type="text" class="form-control" id="guardian_name" name="guardian_name">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_gender" class="form-label">Guardian Gender</label>
+                    <select class="form-select" id="guardian_gender" name="guardian_gender">
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_relation" class="form-label">Relation</label>
+                    <input type="text" class="form-control" id="guardian_relation" name="guardian_relation" placeholder="e.g., Father">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="guardian_email" name="guardian_email">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="guardian_phone" name="guardian_phone">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="guardian_occupation" class="form-label">Occupation</label>
+                    <input type="text" class="form-control" id="guardian_occupation" name="guardian_occupation">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_house_no" class="form-label">House No</label>
+                    <input type="text" class="form-control" id="guardian_house_no" name="guardian_house_no">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_lane" class="form-label">Lane</label>
+                    <input type="text" class="form-control" id="guardian_lane" name="guardian_lane">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="guardian_city" name="guardian_city">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="guardian_state" name="guardian_state">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="guardian_country" name="guardian_country">
+                </div>
+                <div class="mb-3">
+                    <label for="guardian_pincode" class="form-label">Pincode</label>
+                    <input type="text" class="form-control" id="guardian_pincode" name="guardian_pincode">
+                </div>
+            </div>
+        </div>
+        
         <button type="submit" class="btn btn-success">Add Student</button>
         <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">Back</a>
     </form>

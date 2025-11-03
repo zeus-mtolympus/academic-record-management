@@ -182,7 +182,7 @@ def add_admin():
     
     return render_template("add_admin.html")
 
-# Updated add_student route - replace existing (add new fields: personal_email, college_email, phone)
+# Updated add_student route - replace existing (add guardian insertion)
 @app.route("/admin/add_student", methods=["GET", "POST"])
 def add_student():
     if "username" not in session or session["type"] != "Admin":
@@ -204,19 +204,33 @@ def add_student():
         fname = request.form["fname"].strip()
         lname = request.form["lname"].strip()
         dob_str = request.form.get("dob", "").strip()
+        personal_email = request.form.get("pemail", "").strip()
+        college_email = institute_id.lower() + "_" + fname + "@college.ac.in"
+        phone = request.form.get("phone", "").strip()
         gender = request.form.get("gender", "").strip()
         department_id = request.form.get("department_id", "").strip()
         batch = request.form.get("batch", "").strip()
         status = request.form.get("status", "Active").strip()
-        personal_email = request.form.get("personal_email", "").strip()
-        college_email = request.form.get("college_email", "").strip()
-        phone = request.form.get("phone", "").strip()
         house_no = request.form.get("house_no", "").strip()
         lane = request.form.get("lane", "").strip()
         city = request.form.get("city", "").strip()
         state = request.form.get("state", "").strip()
         country = request.form.get("country", "").strip()
         pincode = request.form.get("pincode", "").strip()
+        
+        # Guardian fields (optional)
+        guardian_name = request.form.get("guardian_name", "").strip()
+        guardian_gender = request.form.get("guardian_gender", "").strip()
+        guardian_relation = request.form.get("guardian_relation", "").strip()
+        guardian_email = request.form.get("guardian_email", "").strip()
+        guardian_phone = request.form.get("guardian_phone", "").strip()
+        guardian_occupation = request.form.get("guardian_occupation", "").strip()
+        guardian_house_no = request.form.get("guardian_house_no", "").strip()
+        guardian_lane = request.form.get("guardian_lane", "").strip()
+        guardian_city = request.form.get("guardian_city", "").strip()
+        guardian_state = request.form.get("guardian_state", "").strip()
+        guardian_country = request.form.get("guardian_country", "").strip()
+        guardian_pincode = request.form.get("guardian_pincode", "").strip()
         
         if not all([institute_id, roll_no, fname, lname, dob_str, gender, department_id, batch]):
             flash("Missing required fields for Student.", "danger")
@@ -234,15 +248,31 @@ def add_student():
                 
                 cur_college = college_conn.cursor()
                 cur_college.execute("""
-                    INSERT INTO students (institute_id, fname, lname, roll_no, dob, gender, department_id, batch, cgpa, status, 
-                                          personal_email, college_email, phone, house_no, lane, city, state, country, pincode) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0.0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (institute_id, fname, lname, roll_no, dob, gender, department_id, batch, status, 
-                      personal_email, college_email, phone, house_no, lane, city, state, country, pincode))
+                    INSERT INTO students (institute_id, fname, lname, roll_no, dob, gender, personal_email, college_email, phone, department_id, batch, cgpa, status, house_no, lane, city, state, country, pincode) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (institute_id, fname, lname, roll_no, dob, gender, personal_email, college_email, phone, department_id, batch, 0.0, status, house_no, lane, city, state, country, pincode))
+                
+                # Add guardian if provided (assume enrollment_id = institute_id; adjust if needed)
+                if guardian_name:
+                    try:
+                        # Assume enrollment_id is institute_id or fetch real enrollment.id after creating one
+                      
+                        cur_college.execute("""
+                            INSERT INTO student_guardian (institute_id, name, gender, relation, email, phone, occupation, house_no, lane, city, state, country, pincode)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (institute_id, guardian_name, guardian_gender, guardian_relation, guardian_email, guardian_phone, guardian_occupation, guardian_house_no, guardian_lane, guardian_city, guardian_state, guardian_country, guardian_pincode))
+                        
+                        flash(f"Guardian added for {guardian_name}.", "success")
+                    except sqlite3.IntegrityError as ge:
+                        flash(f"Guardian add error: {str(ge)}", "warning")  # Non-fatal
+                else:
+                    flash("No guardian added (optional).", "info")
                 
                 users_conn.commit()
                 college_conn.commit()
                 flash(f"Student added successfully! Institute ID: {institute_id}, Roll No: {roll_no}, Password: {password}", "success")
+                college_conn.close()
+                users_conn.close()
                 return redirect(url_for("manage_users"))
         
         college_conn.close()
@@ -424,7 +454,8 @@ def update_student_search():
     college_conn.close()
     return render_template("update_student_search.html")
 
-@app.route("/admin/update_student", methods=["POST"])
+# Updated update_student route - replace existing (add guardian add option)
+@app.route("/admin/update_student", methods=["GET", "POST"])
 def update_student():
     if "username" not in session or session["type"] != "Admin":
         return redirect(url_for("login"))
@@ -438,9 +469,6 @@ def update_student():
     department_id = request.form.get("department_id", "").strip()
     batch = request.form.get("batch", "").strip()
     status = request.form.get("status", "").strip()
-    personal_email = request.form.get("personal_email", "").strip()
-    college_email = request.form.get("college_email", "").strip()
-    phone = request.form.get("phone", "").strip()
     house_no = request.form.get("house_no", "").strip()
     lane = request.form.get("lane", "").strip()
     city = request.form.get("city", "").strip()
@@ -448,16 +476,30 @@ def update_student():
     country = request.form.get("country", "").strip()
     pincode = request.form.get("pincode", "").strip()
     
+    # Guardian add fields (optional for new guardian)
+    add_guardian = request.form.get("add_guardian", "").strip() == "yes"
+    if add_guardian:
+        guardian_name = request.form.get("guardian_name", "").strip()
+        guardian_gender = request.form.get("guardian_gender", "").strip()
+        guardian_relation = request.form.get("guardian_relation", "").strip()
+        guardian_email = request.form.get("guardian_email", "").strip()
+        guardian_phone = request.form.get("guardian_phone", "").strip()
+        guardian_occupation = request.form.get("guardian_occupation", "").strip()
+        guardian_house_no = request.form.get("guardian_house_no", "").strip()
+        guardian_lane = request.form.get("guardian_lane", "").strip()
+        guardian_city = request.form.get("guardian_city", "").strip()
+        guardian_state = request.form.get("guardian_state", "").strip()
+        guardian_country = request.form.get("guardian_country", "").strip()
+        guardian_pincode = request.form.get("guardian_pincode", "").strip()
+    
     college_conn = get_college_connection()
     cur = college_conn.cursor()
     
-    # Update all fields including new ones
+    # Update student
     cur.execute("""
         UPDATE students SET fname = ?, lname = ?, roll_no = ?, gender = ?, department_id = ?, batch = ?, status = ?,
-        personal_email = ?, college_email = ?, phone = ?, house_no = ?, lane = ?, city = ?, state = ?, country = ?, pincode = ? 
-        WHERE institute_id = ?
-    """, (fname, lname, roll_no, gender, department_id, batch, status, personal_email, college_email, phone, 
-          house_no, lane, city, state, country, pincode, institute_id))
+        house_no = ?, lane = ?, city = ?, state = ?, country = ?, pincode = ? WHERE institute_id = ?
+    """, (fname, lname, roll_no, gender, department_id, batch, status, house_no, lane, city, state, country, pincode, institute_id))
     
     if dob_str:
         try:
@@ -465,6 +507,24 @@ def update_student():
             cur.execute("UPDATE students SET dob = ? WHERE institute_id = ?", (dob, institute_id))
         except ValueError:
             flash("Invalid DOB format. Use YYYY-MM-DD.", "danger")
+    
+    # Add new guardian if requested
+    if add_guardian and guardian_name:
+        try:
+            # Fetch or create enrollment_id (assume first enrollment or use institute_id as proxy; adjust)
+            cur.execute("SELECT id FROM enrollments WHERE institute_id = ? LIMIT 1", (institute_id,))
+            enrollment_row = cur.fetchone()
+            enrollment_id = enrollment_row['id'] if enrollment_row else institute_id  # Fallback
+            
+            guardian_id = f"G_{institute_id}_{guardian_relation}"  # Auto-generate
+            cur.execute("""
+                INSERT INTO student_guardian (guardian_id, enrollment_id, name, gender, relation, email, phone, occupation, house_no, lane, city, state, country, pincode)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (guardian_id, enrollment_id, guardian_name, guardian_gender, guardian_relation, guardian_email, guardian_phone, guardian_occupation, guardian_house_no, guardian_lane, guardian_city, guardian_state, guardian_country, guardian_pincode))
+            
+            flash(f"New guardian {guardian_name} added.", "success")
+        except sqlite3.IntegrityError as ge:
+            flash(f"Guardian add error: {str(ge)}", "warning")
     
     college_conn.commit()
     college_conn.close()

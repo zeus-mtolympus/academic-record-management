@@ -46,6 +46,3 @@ The system supports authentication, role-based dashboards, record editing, searc
 | Fake Data   | Faker Library        |
 
 ---
-
-## 📂 Folder Structure
-
